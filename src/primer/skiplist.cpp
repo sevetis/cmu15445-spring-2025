@@ -16,9 +16,9 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <stack>
 #include <string>
 #include <vector>
-#include <stack>
 #include "fmt/core.h"
 
 namespace bustub {
@@ -75,8 +75,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS void SkipList<K, Compare, MaxHeight, Seed>::Clear() 
  */
 SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Insert(const K &key) -> bool {
   // UNIMPLEMENTED("TODO(P0): Add implementation.");
-  if (Contains(key))
-    return false;
+  if (Contains(key)) return false;
 
   std::unique_lock lk(rwlock_);
   auto cur_ptr = header_;
@@ -85,12 +84,10 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Insert(c
   for (int i = MaxHeight - 1; i >= 0; --i) {
     while (true) {
       auto nxt_ptr = (*cur_ptr).Next(i);
-      if (nxt_ptr == nullptr or compare_(key, (*nxt_ptr).Key()))
-        break;
+      if (nxt_ptr == nullptr or compare_(key, (*nxt_ptr).Key())) break;
       cur_ptr = nxt_ptr;
     }
-    if (nodes.empty() or cur_ptr != nodes.top())
-      nodes.push(cur_ptr);
+    if (nodes.empty() or cur_ptr != nodes.top()) nodes.push(cur_ptr);
   }
 
   auto height = RandomHeight(), level = 0UL;
@@ -119,8 +116,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Insert(c
  */
 SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Erase(const K &key) -> bool {
   // UNIMPLEMENTED("TODO(P0): Add implementation.");
-  if (not Contains(key))
-    return false;
+  if (not Contains(key)) return false;
 
   std::unique_lock lk(rwlock_);
   auto cur_ptr = header_;
@@ -130,11 +126,11 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Erase(co
   for (int i = MaxHeight - 1; i >= 0; --i) {
     while (true) {
       auto nxt_ptr = (*cur_ptr).Next(i);
-      if (nxt_ptr == nullptr)
-        break;
+      if (nxt_ptr == nullptr) break;
 
       auto nxt_key = (*nxt_ptr).Key();
-      if (compare_(key, nxt_key)) break;
+      if (compare_(key, nxt_key))
+        break;
       else if (compare_(nxt_key, key)) {
         cur_ptr = nxt_ptr;
       } else {
@@ -143,8 +139,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Erase(co
       }
     }
 
-    if (nodes.empty() or cur_ptr != nodes.top())
-      nodes.push(cur_ptr);
+    if (nodes.empty() or cur_ptr != nodes.top()) nodes.push(cur_ptr);
   }
 
   auto height = (*to_erase).Height(), level = 0UL;
@@ -180,11 +175,11 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Contains
   for (int i = MaxHeight - 1; i >= 0; --i) {
     while (true) {
       auto nxt_ptr = (*cur_ptr).Next(i);
-      if (nxt_ptr == nullptr)
-        break;
+      if (nxt_ptr == nullptr) break;
 
       auto nxt_key = (*nxt_ptr).Key();
-      if (compare_(key, nxt_key)) break;
+      if (compare_(key, nxt_key))
+        break;
       else if (not compare_(nxt_key, key))
         return true;
       cur_ptr = nxt_ptr;
@@ -239,8 +234,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::SkipNode
 SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::SkipNode::Next(size_t level) const
     -> std::shared_ptr<SkipNode> {
   // UNIMPLEMENTED("TODO(P0): Add implementation.");
-  if (level >= links_.size())
-      throw "level " + std::to_string(level) + " out of range";
+  if (level >= links_.size()) throw "level " + std::to_string(level) + " out of range";
   return links_[level];
 }
 
@@ -252,8 +246,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::SkipNode
 SKIPLIST_TEMPLATE_ARGUMENTS void SkipList<K, Compare, MaxHeight, Seed>::SkipNode::SetNext(
     size_t level, const std::shared_ptr<SkipNode> &node) {
   // UNIMPLEMENTED("TODO(P0): Add implementation.");
-  if (level >= links_.size())
-      throw "level " + std::to_string(level) + " out of range";
+  if (level >= links_.size()) throw "level " + std::to_string(level) + " out of range";
   links_[level] = node;
 }
 
