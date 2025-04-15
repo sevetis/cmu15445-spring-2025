@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <stack>
@@ -77,6 +78,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Insert(c
   if (Contains(key))
     return false;
 
+  std::unique_lock lk(rwlock_);
   auto cur_ptr = header_;
   auto nodes = std::stack<std::shared_ptr<SkipNode>>();
 
@@ -120,6 +122,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Erase(co
   if (not Contains(key))
     return false;
 
+  std::unique_lock lk(rwlock_);
   auto cur_ptr = header_;
   auto nodes = std::stack<std::shared_ptr<SkipNode>>();
   std::shared_ptr<SkipNode> to_erase;
@@ -171,6 +174,7 @@ SKIPLIST_TEMPLATE_ARGUMENTS auto SkipList<K, Compare, MaxHeight, Seed>::Contains
   // Following the standard library: Key `a` and `b` are considered equivalent if neither compares less
   // than the other: `!compare_(a, b) && !compare_(b, a)`.
   // UNIMPLEMENTED("TODO(P0): Add implementation.");
+  std::shared_lock lk(rwlock_);
   auto cur_ptr = header_;
 
   for (int i = MaxHeight - 1; i >= 0; --i) {
